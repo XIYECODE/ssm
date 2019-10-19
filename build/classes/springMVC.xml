@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"  standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+        
+    <!-- ================================================================ -->
+    
+	<!-- 新增http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd 
+    xmlns:mvc="http://www.springframework.org/schema/mvc"使得下面一句生效-->
+	<mvc:annotation-driven></mvc:annotation-driven><!-- 请求映射处理器，让springMVC识别我们的控制器 -->
+	<!-- 扫描控制器 -->
+    <context:component-scan base-package="cn.lingnan.webshop.controller"/>
+
+    <!-- springMVC的配置信息，视图解析器 -->
+    <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    	<property name="prefix" value="/WEB-INF/jsp/"></property>
+    	<property name="suffix" value=".jsp"></property>
+    </bean>
+        
+    <!-- ================================================================ -->
+    
+    <!-- 拦截器配置 -->
+	<mvc:interceptors>
+		<mvc:interceptor>
+			<mvc:mapping path="/**"/><!-- 拦截器拦截的路径配置 -->
+			<mvc:exclude-mapping path="/static/**"/><!-- 拦截器不需要拦截的路径 -->
+			<mvc:exclude-mapping path="/index"/><!-- 拦截器不需要拦截的路径 -->
+			<mvc:exclude-mapping path="/*.do"/><!-- 拦截器不需要拦截的路径 -->
+			<mvc:exclude-mapping path="/*s/**"/><!-- 拦截器不需要拦截的路径 -->
+			<mvc:exclude-mapping path="/show/**"/><!-- 拦截器不需要拦截的路径 -->
+			<mvc:exclude-mapping path="/register/**"/><!-- 拦截器不需要拦截的路径 -->
+			<bean class="cn.lingnan.webshop.interceptor.LoginInterceptor"/><!-- 拦截器Java代码路径 -->
+		</mvc:interceptor>
+		<mvc:interceptor>
+			<mvc:mapping path="/*s/**"/><!-- 拦截器拦截的路径配置 -->
+			<mvc:exclude-mapping path="/products/**"/><!-- 拦截器不需要拦截的路径 -->
+			<bean class="cn.lingnan.webshop.interceptor.SecurityInterceptor"/><!-- 拦截器Java代码路径 -->
+		</mvc:interceptor>
+	</mvc:interceptors>
+	<!--  -->
+	
+	<!-- 访问静态资源配置，即不经过springMVC核心 -->
+	<mvc:resources mapping="/static/**" location="/static/"/>
+	<!-- location指定的目录不要拦截，直接请求，这里指在根目录（即WebContent）下的static文件下的所有文件 -->
+	<!-- 意思就是在根目录下static的所有文件不会被DispatcherServlet拦截，直接访问 -->
+    
+    <!-- ================================================================ -->
+    
+    <!-- 图片上传·配置 -->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+    	<property name="maxUploadSize" value="500000000"></property>
+    	<property name="defaultEncoding" value="UTF-8"></property>
+    	         <property name="maxInMemorySize" value="1024"></property>
+    </bean>
+</beans>

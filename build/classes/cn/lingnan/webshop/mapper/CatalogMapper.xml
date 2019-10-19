@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lingnan.webshop.dao.CatalogMapper">
+	
+	<!-- ==============================SQL字段转Java属性=========================== -->
+	<resultMap type="catalog" id="baseMap"><!-- resultMap的内容是上面的映射id -->
+		<id column="id" property="cid"/>
+	    <result column="name" property="cname"/>
+	</resultMap>
+	
+	<resultMap type="cn.lingnan.webshop.domain.Product" id="productMap">
+	    <id column="id" property="id"/>
+	    <result column="name" property="name"/>
+	    <result column="price" property="price"/>
+	    <result column="discount" property="discount"/>
+	    <result column="termofvalidity" property="termofvalidity"/>
+	    <result column="dateofmanufacture" property="dateofmanufacture"/>
+	    <!-- collection 中的colum的内容与之搜寻得到的属性名要相同才可以赋值，property对应实体类的字段名 -->
+	    <collection property="attribute" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.AttrAndVal">
+	        <id column="attrid" property="attrid"/>
+	        <result column="value" property="value"/>
+	        <result column="skid" property="skid"/>
+	        <result column="pkid" property="pkid"/>
+	    </collection>
+	    <collection property="secondCatalog" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.SecondCatalog">
+	        <id column="scid" property="scid"/>
+	        <result column="scname" property="scname"/>
+	        <result column="ckid" property="ckid"/>
+	    </collection>
+	    <collection property="catalog" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.Catalog">
+	        <id column="cid" property="cid"/>
+	        <result column="cname" property="cname"/>
+	    </collection>
+	</resultMap>
+	
+	
+	<!-- =================================select================================ -->
+	
+	<select id="find" resultMap="baseMap">
+		select * from catalog
+	</select>
+	<!-- 查找Id -->
+	<select id="findById" resultMap="baseMap" parameterType="Integer">
+		select * from catalog where id = #{id}
+	</select>
+	<select id="findProduct" resultMap="productMap">
+	    select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid, 
+			c.id cid, c.name cname
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondcatalog s ON a.sid=s.id
+		LEFT OUTER JOIN catalog c ON s.cid=c.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" suffixOverrides="and | or">
+			m.isPassed = 1 and 	
+			<if test="cid != null">c.id = #{cid} and</if>
+			<if test="sid != null">s.id = #{sid} and</if>
+			<if test="value != null">a.value like CONCAT(CONCAT('%',#{value},'%')) and</if>
+			<if test="search != null">p.name like CONCAT(CONCAT('%',#{search},'%')) and</if>
+		</trim>
+	</select>
+	
+	<!-- ================================insert=============================== -->
+	
+	
+	<insert id="add">
+		insert into catalog(name) values(#{value})
+	</insert>
+	
+	
+	
+	<!-- ================================update============================== -->
+	
+	
+	
+	
+	<!-- ================================delete============================== -->
+	
+	<delete id="deleteByIds">
+		delete from catalog where id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+ 
+</mapper>

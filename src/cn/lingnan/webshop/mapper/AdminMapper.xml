@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lingnan.webshop.dao.AdminMapper">
+	
+	<!-- ==============================SQL字段转Java属性=========================== -->
+	
+	<resultMap type="admin" id="baseMap"><!-- resultMap的内容是上面的映射id -->
+		<id column="admin_id" property="id"/><!-- 这里可以统一用result 用id只是为了明了该字段是主键-->
+		<result column="admin_name" property="loginName"/>
+		<result column="admin_tel" property="telephone"/>
+		<result column="admin_email" property="email"/>
+		<result column="admin_addr" property="address"/>
+		<result column="admin_delete" property="del_status"/>
+	</resultMap>
+	
+	<!-- =================================select================================ -->
+	
+	<select id="find" resultMap="baseMap" parameterType="cn.lingnan.webshop.query.AdminQuery">
+		select * from admin
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="loginName != null">and admin_name like CONCAT(CONCAT('%',#{loginName},'%'))</if>
+		</trim>
+	</select>
+	
+	<!-- 登陆 -->
+	<select id="login" resultMap="baseMap">
+		select * from admin where admin_name = #{loginName} and password = #{password}
+	</select>
+	<!-- 查找Id -->
+	<select id="findById" resultMap="baseMap" parameterType="Integer">
+		select * from admin where admin_id = #{id}
+	</select>
+	
+	
+	<!-- =================================insert=============================== -->
+	
+	<!-- 新增客户 -->
+	<insert id="add" parameterType="admin">
+		insert into admin
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			admin_name,
+			password,
+			<if test="telephone != null">admin_tel,</if>
+			<if test="email != null">admin_email,</if>
+			<if test="address != null">admin_addr,</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			#{loginName},
+			#{password},
+			<if test="telephone != null">#{telephone},</if>
+			<if test="email != null">#{email},</if>
+			<if test="address != null">#{address},</if>
+		</trim>
+	</insert>
+	
+	
+	<!-- ================================update============================== -->
+	
+	<update id="update" parameterType="admin">
+		update admin
+		<trim prefix="set" suffixOverrides=",">
+			<if test="loginName != null">admin_name = #{loginName},</if>
+			<if test="telephone != null">admin_tel = #{telephone},</if>
+			<if test="email != null">admin_email = #{email},</if>
+			<if test="address != null">admin_addr = #{address},</if>
+		</trim>
+		where admin_id = #{id}
+	</update>
+	
+	
+	<!-- =================================delete============================= -->
+	
+	<delete id="deleteByIds">
+		delete from admin where admin_id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+ 
+</mapper>

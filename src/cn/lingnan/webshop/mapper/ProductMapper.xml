@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lingnan.webshop.dao.ProductMapper">
+	
+	<!-- ==============================SQL字段转Java属性=========================== -->
+	<resultMap type="product" id="baseMap"><!-- resultMap的内容是上面的映射id -->
+		<id column="id" property="id"/>
+	    <result column="name" property="name"/>
+	    <result column="price" property="price"/>
+	    <result column="image" property="image"/>
+	    <result column="discount" property="discount"/>
+	    <result column="termofvalidity" property="termofvalidity"/>
+	    <result column="dateofmanufacture" property="dateofmanufacture"/>
+	    <result column="mid" property="mid"/>
+	    <result column="merchantname" property="merchantname"/>
+	    <result column="isPassed" property="isPassed"/>
+	    <result column="cid" property="ckid"/>
+	    <result column="quantity" property="quantity"/>
+	    <result column="isHot" property="isHot"/>
+	    <result column="registerTime" property="registerTime"/>
+	</resultMap>
+	
+	<resultMap type="product" id="productMap">
+		<id column="id" property="id"/>
+	    <result column="name" property="name"/>
+	    <result column="price" property="price"/>
+	    <result column="image" property="image"/>
+	    <result column="discount" property="discount"/>
+	    <result column="termofvalidity" property="termofvalidity"/>
+	    <result column="dateofmanufacture" property="dateofmanufacture"/>
+	    <result column="mid" property="mid"/>
+	    <result column="merchantname" property="merchantname"/>
+	    <result column="isPassed" property="isPassed"/>
+	    <result column="cid" property="ckid"/>
+	    <result column="quantity" property="quantity"/>
+	    <result column="isHot" property="isHot"/>
+	    <result column="registerTime" property="registerTime"/>
+	    <!-- collection 中的colum的内容与之搜寻得到的属性名要相同才可以赋值，property对应实体类的字段名 -->
+	    <collection property="attribute" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.AttrAndVal">
+	        <id column="attrid" property="attrid"/>
+	        <result column="value" property="value"/>
+	        <result column="skid" property="skid"/>
+	        <result column="pkid" property="pkid"/>
+	    </collection>
+	    <collection property="secondCatalog" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.SecondCatalog">
+	        <id column="scid" property="scid"/>
+	        <result column="scname" property="scname"/>
+	        <result column="ckid" property="ckid"/>
+	    </collection>
+	    <collection property="catalog" javaType="ArrayList" ofType="cn.lingnan.webshop.domain.Catalog">
+	        <id column="cid" property="cid"/>
+	        <result column="cname" property="cname"/>
+	    </collection>
+	</resultMap>
+	
+	<!-- =================================select================================ -->
+	
+	<!-- <select id="find" resultMap="baseMap">
+		select * from product
+		<trim prefix="where" prefixOverrides="and | or">
+			and isPassed = 1 
+			<if test="name != null">or product.name like CONCAT(CONCAT('%',#{name},'%')) </if>
+			<if test="merchantname != null">or product.merchantname like CONCAT(CONCAT('%',#{merchantname},'%')) </if>
+		</trim>
+		<if test="sortName != null">order by product.${sortName} ${sortOrder}</if>
+	</select> -->
+	<select id="find" resultMap="baseMap">
+		select p.* from product p
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" prefixOverrides="and | or">
+			and p.isPassed = 1
+			and m.isPassed = 1
+			<if test="name != null">or p.name like CONCAT(CONCAT('%',#{name},'%')) </if>
+			<if test="merchantname != null">or p.merchantname like CONCAT(CONCAT('%',#{merchantname},'%')) </if>
+		</trim>
+		<if test="sortName != null">order by p.${sortName} ${sortOrder}</if>
+	</select>
+	<!-- ID查找商品 -->
+	<select id="findById" resultMap="baseMap" parameterType="Integer">
+		select p.* from product p
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		where p.id = #{id} and m.isPassed = 1
+	</select>
+	<!--  -->
+	<select id="findProduct" resultMap="productMap">
+	    select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid, 
+			c.id cid, c.name cname
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondproduct s ON a.sid=s.id
+		LEFT OUTER JOIN catalog c ON s.cid=c.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" prefixOverrides="and | or">
+			and m.isPassed = 1
+			<if test="cid != null">and c.id = #{cid}</if>
+			<if test="sid != null">and s.id = #{sid} </if>
+			<if test="value != null">and a.value like CONCAT(CONCAT('%',#{value},'%')) </if>
+			<if test="search != null">and p.name like CONCAT(CONCAT('%',#{search},'%')) </if>
+		</trim>
+	</select>
+	
+	<!-- 20160509 -->
+	<select id="findByProductId" resultMap="productMap">
+	    select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid, 
+			c.id cid, c.name cname
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondcatalog s ON a.sid=s.id
+		LEFT OUTER JOIN catalog c ON s.cid=c.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" suffixOverrides="and | or">
+			m.isPassed = 1 and
+			<if test="cid != null">c.id = #{cid} and</if>
+			<if test="pid != null">p.id = #{pid} and</if>
+		</trim>
+	</select>
+	
+	<!-- 2019-05-16 -->
+	<!-- 选择一级id获取商品 -->
+	<select id="getProductByCid" resultMap="baseMap" parameterType="Integer">
+		select p.* from product p
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id 
+		where p.cid = #{cid} and p.isPassed = 1 and m.isPassed = 1
+	</select>
+	<!-- 关键字查询商品 -->
+	<select id="findProductByKeyword" resultMap="productMap">
+		select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid, 
+			c.id cid, c.name cname
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondcatalog s ON a.sid=s.id
+		LEFT OUTER JOIN catalog c ON s.cid=c.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" suffixOverrides="and | or">
+			p.isPassed = 1 and
+			m.isPassed = 1 and
+			<if test="cid != null">c.id = #{cid} and</if>
+			<if test="sid != null">s.id = #{sid} and</if>
+			<if test="keyword != null">p.name like CONCAT(CONCAT('%',#{keyword},'%')) or</if>
+			<if test="keyword != null">a.value like CONCAT(CONCAT('%',#{keyword},'%')) or</if>
+			<if test="keyword != null">p.merchantname like CONCAT(CONCAT('%',#{keyword},'%')) or</if>
+		</trim>
+	</select>
+	<!-- 2019-05-20 -->
+	<!-- 选择二级id获取商品 -->
+	<select id="getProductBySid" resultMap="productMap">
+		select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondcatalog s ON a.sid=s.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" suffixOverrides="and | or">
+			p.isPassed = 1 and
+			m.isPassed = 1 and
+			<if test="sid != null">s.id=#{sid} and</if>
+		</trim>
+	</select>
+	
+	<!-- 2019-05-23 -->
+	<!-- 更多筛选 -->
+	<select id="findMoreProduct"  resultMap="productMap">
+		select 
+		    p.*, 
+			a.id attrid, a.value, a.sid skid, a.pid pkid, 
+			s.id scid, s.name scname, s.cid ckid, 
+			c.id cid, c.name cname
+        from product p
+	    LEFT OUTER JOIN attr_value a ON p.id=a.pid
+		LEFT OUTER JOIN secondcatalog s ON a.sid=s.id
+		LEFT OUTER JOIN catalog c ON s.cid=c.id
+		LEFT OUTER JOIN merchant m ON p.mid=m.merchant_id
+		<trim prefix="where" suffixOverrides="and | or">
+			p.isPassed = 1 and
+			m.isPassed = 1 and
+			<if test="sid != null">s.id = #{sid} and</if>
+			<if test="minprice != null">p.price &gt;= #{minprice} and</if>
+			<if test="maxprice != null">p.price &lt;= #{maxprice} and</if>
+			<if test="attrArray != null and attrArray.length != 0">
+				a.value in
+				<foreach item="item" index="index" collection="attrArray" open="(" separator="," close=")">
+					#{item}
+				</foreach>
+			</if>
+		</trim>
+	</select>
+	
+	<!-- 2019-06-10 -->
+	<!-- 缺货获取 -->
+	<select id="getShortProducts" resultMap="baseMap">
+		select p.* from product p
+		<trim prefix="where" prefixOverrides="and | or">
+			 and p.isPassed = #{isPassed} and p.mid=#{mid}
+			<if test="name != null"> and p.name like CONCAT(CONCAT('%',#{name},'%'))</if>
+			<!-- <if test="merchantname != null"> or merchantname like CONCAT(CONCAT('%',#{merchantname},'%'))</if> -->
+			<if test="quantity != null"> and p.quantity=0</if>
+			<!-- <if test="mid != null"> and mid=#{mid}</if> -->
+		</trim>
+		<if test="sortName != null">order by p.${sortName} ${sortOrder}</if>
+	</select>
+	
+	<!-- 20190617 -->
+	<!-- 获取待审核商品 -->
+	<select id="getUnPassProducts"  resultMap="baseMap">
+		select * from product
+		<trim prefix="where" prefixOverrides="and | or">
+			 and isPassed = 0
+			<if test="registerTime != null"> and registerTime=#{registerTime}</if>
+		</trim>
+	</select>
+	
+	<!-- ================================insert=============================== -->
+	<insert id="addProduct" useGeneratedKeys="true" keyProperty="id">
+		insert into product
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">name,</if>
+			<if test="price != null">price,</if>
+			<if test="discount != null">discount,</if>
+			<if test="image != null">image,</if>
+			<if test="termofvalidity != null">termofvalidity,</if>
+			<if test="dateofmanufacture != null">dateofmanufacture,</if>
+			<if test="mid != null">mid,</if>
+			<if test="merchantname != null">merchantname,</if>
+			<if test="isPassed != null">isPassed,</if>
+			<if test="ckid != null">cid,</if>
+			<if test="quantity != null">quantity,</if>
+			<if test="registerTime != null">registerTime,</if>
+			isHot,
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="name != null">#{name},</if>
+			<if test="price != null">#{price},</if>
+			<if test="discount != null">#{discount},</if>
+			<if test="image != null">#{image},</if>
+			<if test="termofvalidity != null">#{termofvalidity},</if>
+			<if test="dateofmanufacture != null">#{dateofmanufacture},</if>
+			<if test="mid != null">#{mid},</if>
+			<if test="merchantname != null">#{merchantname},</if>
+			<if test="isPassed != null">#{isPassed},</if>
+			<if test="ckid != null">#{ckid},</if>
+			<if test="quantity != null">#{quantity},</if>
+			<if test="registerTime != null">#{registerTime},</if>
+			isHot,
+		</trim>
+	</insert>
+	
+	
+	<!-- ================================update============================== -->
+	
+	<update id="update" parameterType="product">
+		update product
+		<trim prefix="set" suffixOverrides=",">
+			<if test="name != null">name = #{name},</if>
+			<if test="quantity != null">quantity = #{quantity},</if>
+			<if test="price != null">price = #{price},</if>
+			<if test="discount != null">discount = #{discount},</if>
+			<if test="dateofmanufacture != null">dateofmanufacture = #{dateofmanufacture},</if>
+			<if test="termofvalidity != null">termofvalidity = #{termofvalidity},</if>
+			<if test="image != null">image = #{image},</if>
+			<if test="isPassed != null">isPassed = #{isPassed},</if>
+		</trim>
+		where id = #{id}
+	</update>
+	
+	<!-- 2019-06-18 -->
+	<update id="pass">
+		update product set isPassed = 1 where id = #{pid}
+	</update>
+	
+	
+	<!-- ================================delete============================== -->
+	
+	<delete id="deleteByIds">
+		<!-- delete from product where id in
+		<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+			#{item}
+		</foreach> -->
+		update product set isPassed = 2
+		<trim prefix="where">
+			id in
+			<foreach item="item" index="index" collection="array" open="(" separator="," close=")">
+				#{item}
+			</foreach>
+		</trim>
+	</delete>
+ 
+</mapper>

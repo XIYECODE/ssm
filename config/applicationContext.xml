@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"  standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+	        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd	">
+    
+    <!-- ============================bean definitions================================ -->
+    
+    <!-- bean definitions here -->
+    <!-- 方法一：
+    <bean id="adminService" class="cn.lingnan.webshop.service.impl.AdminServiceImpl"></bean>
+    <bean id="userService" class="cn.lingnan.webshop.service.impl.UserServiceImpl"></bean>
+    <bean id="merchantService" class="cn.lingnan.webshop.service.impl.MerchantServiceImpl"></bean>
+    <bean id="catalogService" class="cn.lingnan.webshop.service.impl.CatalogServiceImpl"></bean>
+    <bean id="secondCatalogService" class="cn.lingnan.webshop.service.impl.SecondCatalogServiceImpl"></bean> 
+    -->
+    
+    
+    <!--方法二： 业务层的实现类使用@Service，必须在此扫描其实现类路径 -->
+    <context:component-scan base-package="cn.lingnan.webshop.service.impl"></context:component-scan>
+    
+    
+    <!-- =============================工具====================================== -->
+    
+    <!-- 加载properties文件 -->
+    <context:property-placeholder location="classpath:sys.properties"/>
+    <bean class="cn.lingnan.webshop.utils.Sys"></bean>
+     
+    <!-- ====================================================================== -->
+    
+     <!-- 创建连接池 需要导入mybatis-3.1.1.jar-->
+     <bean id="datasource" class="com.alibaba.druid.pool.DruidDataSource">
+     	<property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+     	<property name="url" value="jdbc:mysql://localhost:3306/WebShopPlatform?serverTimezone=GMT&amp;useUnicode=true&amp;characterEncoding=utf-8&amp;useSSL=false&amp;allowMultiQueries=true"></property>
+     	<property name="username" value="root"></property>
+     	<property name="password" value="...."></property>
+     </bean>
+     <!-- 需要导入 mybatis-spring-1.2.3.jar-->
+     <bean class="org.mybatis.spring.SqlSessionFactoryBean">
+		<!-- dataSource //数据库的连接信息[连接池]-->
+		<!-- configLocation 指定mybatis主配置文件-->
+		<!-- mapperLocations 指定映射文件（sql）-->
+     	<property name="dataSource" ref="datasource"></property>
+     	<property name="configLocation" value="classpath:mybatis.xml"></property>
+     	<property name="mapperLocations" value="classpath:cn/lingnan/webshop/mapper/*Mapper.xml"></property>
+     </bean>
+     <!--让spring找到UserMapper接口 -->
+     <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+     	<property name="basePackage" value="cn.lingnan.webshop.dao"></property>
+     </bean>
+      
+    <!-- ====================================================================== -->
+    
+</beans>

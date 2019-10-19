@@ -1,0 +1,70 @@
+@charset "UTF-8";
+.width-100{
+	width: 100px;
+}
+.margin-20{
+	margin: 10px auto;
+}
+.img-responsive-300{
+	display: block;
+	height: 300px;
+	width: 100%;
+}
+.border-none{
+	border: none;
+}
+.border-bottom-css{
+	border-bottom: 1px solid #eee;
+	margin-bottom : 20px;
+}
+.title-height{
+	height : 50px;
+	line-height : 50px;
+}
+.font-size-20{
+	font-size : 20px;
+}
+a{
+	color : white;
+}
+a:link, a:visited, a:hover{
+	cursor : pointer;
+	text-decoration : none;
+}
+
+.img-responsive-100{
+	display: block;
+	height: 100px;
+	width: 100%;
+}
+/* 标题主题色 */
+.bg-color-title-info{
+	color: #fff;
+	background-color: #31b0d5;
+	border-color: #269abc;
+}
+.bg-color-title-success{
+	color: #fff;
+	background-color: #449d44;
+	border-color: #398439;
+}
+.bg-color-title-warming{
+	color: #fff;
+	background-color: #ec971f;
+	border-color: #d58512;
+}
+.bg-color-title-danger{
+	color: #fff;
+	background-color: #31b0d5;
+	border-color: #269abc;
+}
+.bg-color-title-default{
+	color: #fff;
+	background-color: transportant;
+	border-color: none;
+}
+
+.width-full{
+    display: block;
+    width: 100%;
+}

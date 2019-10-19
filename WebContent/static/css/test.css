@@ -1,0 +1,38 @@
+ul {
+	border-style: none;
+	text-align: center;
+}
+
+ul li {
+	display: inline-block;
+	width: 100px;
+}
+
+ul li:hover {
+	background-color: #ff8000;
+}
+
+.navTitle {
+	height: 30px;
+	line-height: 30px;
+}
+
+.secondList {
+	margin-bottom: 0;
+}
+
+.valueListBox {
+	margin: 0 auto;
+	width: 30%;
+}
+
+.valueList {
+	margin: 0;
+	line-height: 30px;
+	text-align: left;
+	color: #00ff00;
+}
+
+.valueList li {
+	text-align: center;
+}

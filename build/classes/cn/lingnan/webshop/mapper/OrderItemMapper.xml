@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.lingnan.webshop.dao.OrderItemMapper">
+	
+	<!-- ==============================SQL字段转Java属性=========================== -->
+	
+	<resultMap type="orderItem" id="baseMap"><!-- resultMap的内容是上面的映射id -->
+		<id column="id" property="id"/><!-- 这里可以统一用result 用id只是为了明了该字段是主键-->
+		<id column="pid" property="pid"/>
+		<id column="sid" property="sid"/>
+		<result column="price" property="price"/>
+		<result column="quantity" property="quantity"/>
+		<result column="name" property="name"/>
+		<result column="address" property="address"/>
+		<result column="telephone" property="telephone"/>
+		<result column="status" property="status"/>
+	</resultMap>
+	
+	<!-- =================================select================================ -->
+	
+	<!-- 2019-05-27 -->
+	<!-- 根据用户和商品确定订单项中的唯一信息 -->
+	<!-- <select id="find" resultMap="baseMap">
+		select * from orderItem where status = 0 and pid= #{pid} and sid = #{sid}
+	</select> -->
+	<!-- ============================用户========================== -->
+	<!-- 2019-06-03 -->
+	<!-- 获取购物车 -->
+	<select id="getCart" resultMap="baseMap">
+		select * from orderItem where status = 0 and sid = #{sid}
+	</select>
+	
+	<select id="find" resultMap="baseMap">
+		select * from orderItem where status = #{status} and pid= #{pid} and sid = #{sid}
+	</select>
+	<select id="findAll" resultMap="baseMap">
+		select * from orderItem where status = #{status} and sid = #{sid}
+	</select>
+	<!-- ============================商家========================== -->
+	<!-- 2019-06-10 -->
+	<select id="list" resultMap="baseMap">
+		select o.* from orderItem o
+		<trim prefix="where" prefixOverrides="and | or">
+			<if test="id != null">and o.id = #{id}</if>
+			<if test="sid != null">and o.sid = #{sid}</if>
+			<if test="status != null">and o.status = #{status}</if>
+			<if test="mid != null">
+				and o.pid in
+				<trim prefix="(" suffix=")">
+					select id from product
+					<if test="mid != null">where mid=#{mid}</if>
+				</trim>
+			</if>
+		</trim>
+	</select>
+	
+	<!-- =================================insert=============================== -->
+	
+	<!-- 2019-05-27 -->
+	<!--  -->
+	<insert id="addOrderItem" parameterType="orderItem">
+		insert into orderItem
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">id,</if>
+			<if test="pid != null">pid,</if>
+			<if test="sid != null">sid,</if>
+			<if test="price != null">price,</if>
+			<if test="quantity != null">quantity,</if>
+			<if test="status != null">status,</if>
+		</trim>
+		values
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">#{id},</if>
+			<if test="pid != null">#{pid},</if>
+			<if test="sid != null">#{sid},</if>
+			<if test="price != null">#{price},</if>
+			<if test="quantity != null">#{quantity},</if>
+			<if test="status != null">#{status},</if>
+		</trim>
+	</insert>
+	
+	<!-- ================================update============================== -->
+	
+	<!-- 2019-05-27 -->
+	<!-- 更新已存在商品信息 -->
+	<update id="update">
+		update orderItem
+		<trim prefix="set" suffixOverrides=",">
+			<if test="orderItem.id != null"> id = #{orderItem.id},</if>
+			<if test="orderItem.price != null">price=#{orderItem.price},</if>
+			<if test="orderItem.quantity != null">quantity=#{orderItem.quantity},</if>
+			<if test="orderItem.status != null">status=#{orderItem.status},</if>
+			<if test="orderItem.name != null">name=#{orderItem.name},</if>
+			<if test="orderItem.telephone != null">telephone=#{orderItem.telephone},</if>
+			<if test="orderItem.address != null">address=#{orderItem.address},</if>
+		</trim>
+		where id = #{oldId} and pid= #{orderItem.pid} and sid = #{orderItem.sid}
+	</update>
+	<!-- 2019-06-11 -->
+	<update id="updateStatus">
+			update orderItem
+			<if test="status != null">
+				set status = #{status} where (id, pid, sid) in 
+				<foreach collection="list" item="map" open="(" separator="," close=")">
+					(#{map.id}, #{map.pid,jdbcType=INTEGER}, #{map.sid,jdbcType=INTEGER})
+				</foreach>
+			</if>
+	</update>
+	
+	
+	<!-- =================================delete============================= -->
+	
+	<delete id="deleteByPids">
+		delete from orderItem where id in
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			#{item}
+		</foreach>
+	</delete>
+	
+	<delete id="deleteByids">
+		delete from orderItem where (id, pid, sid) in
+		<foreach item="item" index="index" collection="ids" open="(" separator="," close=")">
+			(#{item[0]}, #{item[1],jdbcType=INTEGER}, #{item[2],jdbcType=INTEGER})
+		</foreach>
+	</delete>
+ 
+</mapper>

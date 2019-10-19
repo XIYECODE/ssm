@@ -1,0 +1,24 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <!-- Bootstrap -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/bootstrap/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/font-awesome/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/Ionicons/css/ionicons.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="${pageContext.request.contextPath}/static/css/AdminLTE.min.css">
+   
+   
+  <script src="${pageContext.request.contextPath}/static/js/jquery/jQuery-2.2.0.min.js"></script><!-- 导入jQuery -->
+  <script src="${pageContext.request.contextPath}/static/bootstrap/js/bootstrap.min.js"></script><!-- 基于jQuery -->
+  <script src="${pageContext.request.contextPath}/static/js/extend.js"></script><!-- 序列化表单 -->
+  <script src="${pageContext.request.contextPath}/static/js/request.js"></script><!-- ajax请求 -->
+  <script  type="text/javascript">
+  	$(function(){
+  	  	sys = {};				//没有var定义，是一个全局变量
+  	  	sys.contextPath = "${pageContext.request.contextPath}";
+  	});
+  </script>
